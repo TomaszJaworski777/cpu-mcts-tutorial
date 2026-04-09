@@ -132,7 +132,7 @@ impl Display for FEN {
 }
 
 fn normalize_castle_rights(fen: &FEN, rights: &str) -> String {
-    //Helper method to find occurance of the character in the fen string
+    //Helper method to find occurence of the character in the fen string
     let find_files = |rank_str: &String, target: char| -> Vec<u8> {
         let mut result = Vec::new();
         let mut file_idx = 0;

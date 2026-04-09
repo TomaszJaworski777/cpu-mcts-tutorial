@@ -1,7 +1,7 @@
 # CPU MCTS Tutorial
 
 > [!NOTE]
-> This tutorial assumes you already have a functional chess engine skeleton, including UCI support and a reliable legal copy-make move generator. Please note that the structures and practices demonstrated in this guide may not be perfectly optimized; the primary focus is to present the core concepts in their simplest and most accessible form. This repository contains the code of a simple mcts engine, with piece count evaluation and unform policy network replacement. Note that some of the features in the code might degrade the engine strength due to poor quality of evaluation and policy.
+> This tutorial assumes you already have a functional chess engine skeleton, including UCI support and a reliable legal copy-make move generator. Please note that the structures and practices demonstrated in this guide may not be perfectly optimized; the primary focus is to present the core concepts in their simplest and most accessible form. This repository contains the code of a simple mcts engine, with piece count evaluation and uniform policy network replacement. Note that some of the features in the code might degrade the engine strength due to poor quality of evaluation and policy.
 
 ## Content
 - [Basics of MCTS](#basics-of-mcts)
@@ -26,7 +26,7 @@
 
 ## Basics of MCTS
 ### Alpha-Beta vs MCTS
-Unlike Alpha-Beta depth-first algorithm, that tries to search each move to fixed depth, pruning majority of branches through clever heuristics, MCTS is best-first. Over duration of the search it builds the game tree in memory and keep tracks of vists and results to the each node of the tree. The cool part is that it doesn’t search in a fixed order. In one iteration, it might be diving 20 moves deep into a promising line, in the next, it might jump back to check a move at depth 2, and then suddenly go down a third path to depth 40. As the effect of this, MCTS might dive very deep on what it seems to be a best line, while keeping seemingly bad lines very shallow. This allows MCTS to shine in very complex strategic positions, but might make it blind to surprising tactics.
+Unlike Alpha-Beta depth-first algorithm, that tries to search each move to fixed depth, pruning majority of branches through clever heuristics, MCTS is best-first. Over duration of the search it builds the game tree in memory and keep tracks of visits and results to each node of the tree. The cool part is that it doesn’t search in a fixed order. In one iteration, it might be diving 20 moves deep into a promising line, in the next, it might jump back to check a move at depth 2, and then suddenly go down a third path to depth 40. As the effect of this, MCTS might dive very deep on what it seems to be a best line, while keeping seemingly bad lines very shallow. This allows MCTS to shine in very complex strategic positions, but might make it blind to surprising tactics.
 
 ### 4 Iteration Stages
 MCTS works by repeating a search loop over and over until certain conditions are met. These repetitions are called iterations. Generally, the more iterations the system performs, the higher the quality of the final result. Each iteration consists of four primary stages:
@@ -49,7 +49,7 @@ This formula ensures a balance: the engine chooses moves that have a high score 
 
 Here is example implementation in Rust:
 ```rust
-//Retuns index of a selected node
+//Returns index of a selected node
 fn select(parent_idx: usize, tree: &Tree) -> usize {
     //Approx sqrt(2), it's good default value, but you want to spsa it later
     const C: f32 = 1.41;
@@ -63,7 +63,7 @@ fn select(parent_idx: usize, tree: &Tree) -> usize {
         let child = &tree[child_idx];
 
         let q = if child.visits == 0 {
-            //We dont have any information about this child, so we assume it's neutral
+            //We don't have any information about this child, so we assume it's neutral
             0.5
         } else {
             child.score / child.visits as f32
@@ -175,11 +175,11 @@ Here is a gif as an example of entire iteration process:
 
 <img src="./.readme/MCTS.gif" width="888" alt="MCTS Search Tree Animation">
 
-You can see here clearly, as node with highest puct score gets selected, expanded, the score is backpropagated with oscylating POV. All nodes start with score of 0.5, as it represents neutral state of node that we know nothing about.
+You can see here clearly, as node with highest puct score gets selected, expanded, the score is backpropagated with oscillating POV. All nodes start with score of 0.5, as it represents neutral state of node that we know nothing about.
 
-First iteration simulation gave result of 0.5, effectivly a draw, but you can see that puct still dropped, due to increased amount of visits to this child. Puct of other children did not change because we are using max() function on the parent visits.
+First iteration simulation gave result of 0.5, effectively a draw, but you can see that puct still dropped, due to increased amount of visits to this child. Puct of other children did not change because we are using max() function on the parent visits.
 
-In the second iteration you can see that simulation resulted in a win (1.0). After we backpropagated the reverse of the score to the parent, not only it's visits increased but also score went down a lot, causing puct to drop massivly. But then it increased a bit as parent (root node) visits also increased.
+In the second iteration you can see that simulation resulted in a win (1.0). After we backpropagated the reverse of the score to the parent, not only its visits increased but also score went down a lot, causing puct to drop massively. But then it increased a bit as parent (root node) visits also increased.
 
 Mind that simulation here is reverse of the output of the eval method, to make sure that we are selecting the correct node. If we were to just use pure output from the node POV, we would have to select the node with lowest puct score, but that would break the formula, or just reverse the score in the selection code.
 
@@ -199,7 +199,7 @@ fn best_move(tree: &Tree) -> (Move, f32) {
 
         //We don't want to select moves that were not explored at all
         //Not skipping them might result in weird scenario where unexplored node has highest
-        //score, effectivly making out engine walk blind
+        //score, effectively making out engine walk blind
         if child.visits == 0 {
             continue;
         }
@@ -221,7 +221,7 @@ fn best_move(tree: &Tree) -> (Move, f32) {
 ### Basic Implementation
 
 >[!WARNING]
-> Structures and solutions presented below were made purely for demonstration purposes, this way of doing thing might not be the most optimal solution.
+> Structures and solutions presented below were made purely for demonstration purposes, this way of doing things might not be the most optimal solution.
 
 Here is simple tree implementation for the purpose of this tutorial:
 ```rust
@@ -315,7 +315,7 @@ fn iteration(position: &mut ChessPosition, tree: &mut Tree) {
 I decided to implement the search process using an iterative approach to make each step of the algorithm as clear and easy to follow as possible. However, it is worth noting that the MCTS algorithm is also very well-suited for recursion. In fact, most MCTS engines use a recursive style because it naturally matches the structure of a tree. While recursion can be more "elegant" and compact, using an iterative loop helps to visualize the flow.
 
 > [!NOTE]
-> In MCTS we use iterations as nodes. In UCI, when command `go nodes 5000` is inputed, we are expected to run 5000 iterations on the tree.
+> In MCTS we use iterations as nodes. In UCI, when command `go nodes 5000` is inputted, we are expected to run 5000 iterations on the tree.
 
 If you implemented everything correctly, you can test it by running several testing positions for `1000000` nodes:
 
@@ -377,7 +377,7 @@ If you implemented everything correctly, you can test it by running several test
 We have successfully implemented basic version of MCTS. Below there is a list of features that will allow us to improve it further. Repository contains directories with the names of the features, each next directory contains all the features we added prior.
 
 ### Expansion on second visit
-As mentioned before, by expanding on second visit instead of the first, we heavly reduce the amount of times `expand()` method is called (due to leaf nodes that only recieved one visit during entire search), gaining big performance boost, that increases as our policy gets heavier and heavier.
+As mentioned before, by expanding on second visit instead of the first, we heavily reduce the amount of times `expand()` method is called (due to leaf nodes that only received one visit during entire search), gaining big performance boost, that increases as our policy gets heavier and heavier.
 
 Here is a gif, showing how the iteration behaves now:
 
@@ -393,7 +393,7 @@ while tree[current_node].children.len() > 0 {
 }
 
 //3. Expand the leaf and select the child with highest policy (unless the selected node is terminal)
-//Mind that we only do it on SECOND visit now, skipping it entirely if child.vists == 0
+//Mind that we only do it on SECOND visit now, skipping it entirely if child.visits == 0
 if tree[current_node].visits == 1 && tree[current_node].result == GameResult::Ongoing {
     expand(current_node, position, tree);
     current_node = select(current_node, tree);
@@ -403,7 +403,7 @@ if tree[current_node].visits == 1 && tree[current_node].result == GameResult::On
 ```
 
 ### Mate proving
-Even though our MCTS should find mates pretty well, score $1.0$ might get easly lost in the sea of the winning nodes. Solution that should help slightly with finding mates, and also allowing engine to find concrete proven mate lines is mate proving. The idea is generally simple, similar to backpropagating the score, we also backpropagate proven terminal states. If we can mate and it's out move, we can mark that node as mate too. If every child of a parent node is a mate, then the parent node is forced mate too.
+Even though our MCTS should find mates pretty well, score $1.0$ might get easily lost in the sea of the winning nodes. Solution that should help slightly with finding mates, and also allowing engine to find concrete proven mate lines is mate proving. The idea is generally simple, similar to backpropagating the score, we also backpropagate proven terminal states. If we can mate and it's our move, we can mark that node as mate too. If every child of a parent node is a mate, then the parent node is forced mate too.
 
 The example code for it looks like this:
 ```rust
@@ -441,7 +441,7 @@ for &node_idx in selection_stack.iter().rev() {
     backpropagate(node_idx, &mut score, tree);
 
     //Offset result backprop by 1, to make sure we have access to parent and child
-    //at the same time. We dont have to set the result of the leaf child like we did
+    //at the same time. We don't have to set the result of the leaf child like we did
     //with score, because that's already handled in the simulation step.
     if let Some(idx) = child_idx {
         backpropagate_result(node_idx, idx, tree);
@@ -456,7 +456,7 @@ for &node_idx in selection_stack.iter().rev() {
 We have spent a lot of time researching a move. It's very wasteful to just remove that work before we start another search. That's where tree reuse comes in. General idea is quite simple, perform a shallow search of a tree looking for a new position, if we find the position we were looking for, use the new node as a root. If we didn't find the new root, well, then we have to wipe the tree and start building it from zero.
 
 > [!WARNING]
-> Provided code selects matching position based on the Zobrist Hash. The issue is that shallow search through a tree might find very rarely visited transposition, leading to unoptimal reuse. This can be vastly mitigated by sorting the moves based on policy during expansion, and we will be doing that anyway for progressive widening.
+> Provided code selects matching position based on the Zobrist Hash. The issue is that shallow search through a tree might find very rarely visited transposition, leading to suboptimal reuse. This can be vastly mitigated by sorting the moves based on policy during expansion, and we will be doing that anyway for progressive widening.
 
 Here is example code in Rust:
 ```rust
@@ -494,7 +494,7 @@ fn find_new_root_internal(&self, node_idx: usize, position: &ChessPosition, targ
 ```
 
 ### FPU
-Another easy improvement to our alogrithm. Until now, we assumed that every node we have no information about is draw. The issue is that in positions that are no longer drawish, this assumption is wrong. This feature makes that 0 visit score dynamic based on the score of the parent.
+Another easy improvement to our algorithm. Until now, we assumed that every node we have no information about is draw. The issue is that in positions that are no longer drawish, this assumption is wrong. This feature makes that 0 visit score dynamic based on the score of the parent.
 
 Here is modified method in Rust:
 ```rust
@@ -510,7 +510,7 @@ fn select(parent_idx: usize, tree: &Tree) -> usize {
         let child = &tree[child_idx];
 
         let q = if child.visits == 0 {
-            //We dont have any information about this child, so we are going to trust our
+            //We don't have any information about this child, so we are going to trust our
             //evaluation, and assume that this node matches parent's score
             1.0 - parent_score
         } else {
@@ -536,7 +536,7 @@ cpuct *= 1.0 + ((parent_node.visits as f32 + CPUCT_VISIT_SCALE) / CPUCT_VISIT_SC
 ```
 
 ### Exploration scaling
-This is neat feature, that does not increase the playing strength on it's own, but it replaces visit factor in PUCT. Lets assume $N = max(N, 1)$, then this feature replaces this 
+This is neat feature, that does not increase the playing strength on its own, but it replaces visit factor in PUCT. Let's assume $N = max(N, 1)$, then this feature replaces this 
 
 $$ \frac{\sqrt{N}}{n + 1} $$ 
 
@@ -544,7 +544,7 @@ with this
 
 $$ \frac{e^{\ln{N} \times \tau}}{n + 1} $$ 
 
-which for $\tau = 0.5$ is mathematical equivalent. This allows us to fine tune $\tau$ parameter for more detailed control over exploration.
+which for $\tau = 0.5$ is mathematically equivalent. This allows us to fine tune $\tau$ parameter for more detailed control over exploration.
 
 ```rust
 const TAU: f32 = 0.5;
@@ -563,7 +563,7 @@ for (_, child_policy, _) in policy.iter_mut() {
 ```
 
 ## And Beyond
-To get a function CPU MCTS chess engine, you still need to implement basic Time Manager and LRU, that will clean up the tree from least used nodes, allowing you to constantly recycle limited Hash space. As mentioned before, above features might decrease playing strength of the engine, until it's networks become strong enough. There are also other featues that were not mentioned here, f.ex. Gini impurity, Variance scaling, Progressive Widening, Butterfly History, etc.., but majority of MCTS strength comes from networks. For data generation look into increasing root PST and Cpuct and implementing Dirichlet Noise, KLD, Search Temperature, Opening book, and more..
+To get a functional CPU MCTS chess engine, you still need to implement basic Time Manager and LRU, that will clean up the tree from least used nodes, allowing you to constantly recycle limited Hash space. As mentioned before, above features might decrease playing strength of the engine, until its networks become strong enough. There are also other features that were not mentioned here, f.ex. Gini impurity, Variance scaling, Progressive Widening, Butterfly History, etc.., but majority of MCTS strength comes from networks. For data generation look into increasing root PST and Cpuct and implementing Dirichlet Noise, KLD, Search Temperature, Opening book, and more..
 
 > [!NOTE]
 > If you want to make your engine competitive at VLTC, make sure to run VLTC tests on every one of your Time Manager features. MCTS is very sensitive, and many heuristics that seem good at STC or even LTC often fail to scale, which is especially common in the Time Manager.
